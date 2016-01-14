@@ -547,12 +547,12 @@ class SmileGenerator(object):
         self.write_positive_vint(l)
         while l >= 7:
             i = data[offset]
-            offset += 1
             for x in xrange(1, 7):
                 self.write_byte(int(((i >> x) & 0x7F)))
                 i = (i << 8) | (data[offset + x] & 0xFF)
                 offset += 1
             self.write_bytes(int(((i >> 7) & 0x7F)), int((i & 0x7F)))
+            offset += 7
             l -= 7
         #  and then partial piece, if any
         if l > 0:
@@ -728,7 +728,7 @@ def encode(py_obj, header=True, ender=False, shared_keys=True, shared_vals=True,
     if isinstance(py_obj, (tuple, set)):
         py_obj = list(py_obj)
     elif not isinstance(py_obj, (list, dict)):
-        raise ValueError('Invalid type for "obj" paramater.  Must be list or tuple')
+        raise ValueError('Invalid type for "obj" parameter.  Must be list or tuple')
 
     sg = SmileGenerator(shared_keys, shared_vals, bin_7bit)
     if header:
@@ -789,8 +789,12 @@ def encode(py_obj, header=True, ender=False, shared_keys=True, shared_vals=True,
                 sg.write_field_name(key)
                 _iterencode(val)
             sg.write_end_object()
+        elif isinstance(obj, bytearray):  # TODO: make sure there aren't any other types this applies to
+            sg.write_binary(obj)
         else:
-            _iterencode(obj)
+            # if type is unknown, raise an exception
+            # TODO: verify that this is correct. make sure we aren't supposed to ignore unknown types.
+            raise TypeError('Unknown type for "obj" parameter: type=%s' % type(obj).__name__)
     _iterencode(py_obj)
     if ender:
         sg.write_end_marker()

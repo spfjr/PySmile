@@ -252,11 +252,11 @@ def decode(string):
                 # Floating point numbers
                 if byt == TOKEN_BYTE_FLOAT_32:
                     fp = state.pull_bits(5)
-                    b1 = fp[0]
-                    b2 = fp[1] << 7
+                    b1 = fp[0] << 7 << 7 << 7 << 7
+                    b2 = fp[1] << 7 << 7 << 7
                     b3 = fp[2] << 7 << 7
-                    b4 = fp[3] << 7 << 7 << 7
-                    b5 = fp[4] << 7 << 7 << 7 << 7
+                    b4 = fp[3] << 7
+                    b5 = fp[4]
                     byt = (b1 | b2 | b3 | b4 | b5)
                     try:
                         flt = util.bits_to_float(byt)
@@ -264,17 +264,18 @@ def decode(string):
                         flt = util.long_bits_to_float(byt)
                     state.write(flt)
                 elif byt == TOKEN_BYTE_FLOAT_64:
-                    fp = state.pull_bits(9)
-                    b1 = fp[0]
-                    b2 = fp[1] << 7
-                    b3 = fp[2] << 7 << 7
-                    b4 = fp[3] << 7 << 7 << 7
-                    b5 = fp[4] << 7 << 7 << 7 << 7
-                    b6 = fp[4] << 7 << 7 << 7 << 7 << 7
-                    b7 = fp[4] << 7 << 7 << 7 << 7 << 7 << 7
-                    b8 = fp[4] << 7 << 7 << 7 << 7 << 7 << 7 << 7
-                    b9 = fp[4] << 7 << 7 << 7 << 7 << 7 << 7 << 7 << 7
-                    byt = (b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9)
+                    fp = state.pull_bits(10)
+                    b1 = fp[0] << 7 << 7 << 7 << 7 << 7 << 7 << 7 << 7 << 7
+                    b2 = fp[1] << 7 << 7 << 7 << 7 << 7 << 7 << 7 << 7
+                    b3 = fp[2] << 7 << 7 << 7 << 7 << 7 << 7 << 7
+                    b4 = fp[3] << 7 << 7 << 7 << 7 << 7 << 7
+                    b5 = fp[4] << 7 << 7 << 7 << 7 << 7
+                    b6 = fp[5] << 7 << 7 << 7 << 7
+                    b7 = fp[6] << 7 << 7 << 7
+                    b8 = fp[7] << 7 << 7
+                    b9 = fp[8] << 7
+                    b10 = fp[9]
+                    byt = (b1 | b2 | b3 | b4 | b5 | b6 | b7 | b8 | b9 | b10)
                     flt = util.long_bits_to_float(byt)
                     state.write(flt)
                 else:
