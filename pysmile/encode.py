@@ -37,6 +37,7 @@ class SharedStringNode(object):
     Helper class used for keeping track of possibly shareable String references (for field names
     and/or short String values)
     """
+
     def __init__(self, value, index, nxt):
         self.value = value
         self.index = index
@@ -229,10 +230,10 @@ class SmileGenerator(object):
 
         :param int ix: Index
         """
-        if ix >= len(self.shared_keys)-1:
+        if ix >= len(self.shared_keys) - 1:
             raise ValueError(
-                'Trying to write shared name with index {} but have only seen {}!'.format(
-                    ix, len(self.shared_keys)))
+                    'Trying to write shared name with index {} but have only seen {}!'.format(
+                            ix, len(self.shared_keys)))
         if ix < 64:
             self.write_byte(int((TOKEN_PREFIX_KEY_SHARED_SHORT + ix)))
         else:
@@ -244,10 +245,10 @@ class SmileGenerator(object):
 
         :param int ix: Index
         """
-        if ix > len(self.shared_values)-1:
-            raise IllegalArgumentException(
-                'Internal error: trying to write shared String value with index {}; but have '
-                'only seen {} so far!'.format(ix, len(self.shared_values)))
+        if ix > len(self.shared_values) - 1:
+            raise ValueError(
+                    'Internal error: trying to write shared String value with index {}; but have '
+                    'only seen {} so far!'.format(ix, len(self.shared_values)))
         if ix < 31:
             #  add 1, as byte 0 is omitted
             self.write_byte(TOKEN_PREFIX_SHARED_STRING_SHORT + 1 + ix)
@@ -331,10 +332,10 @@ class SmileGenerator(object):
                 if i <= 0x1F:
                     self.write_byte(int((TOKEN_PREFIX_SMALL_INT + i)))
                     return
-                #  nope, just small, 2 bytes (type, 1-byte zigzag value) for 6 bit value
+                # nope, just small, 2 bytes (type, 1-byte zigzag value) for 6 bit value
                 self.write_bytes(TOKEN_BYTE_INT_32, int((0x80 + i)))
                 return
-            #  Ok: let's find minimal representation then
+            # Ok: let's find minimal representation then
             b0 = int((0x80 + (i & 0x3F)))
             i >>= 6
             if i <= 0x7F:
@@ -351,7 +352,7 @@ class SmileGenerator(object):
             if i <= 0x7F:
                 self.write_bytes(TOKEN_BYTE_INT_32, int(i), b2, b1, b0)
                 return
-            #  no, need all 5 bytes
+            # no, need all 5 bytes
             b3 = int((i & 0x7F))
             self.write_bytes(TOKEN_BYTE_INT_32, int((i >> 7)), b3, b2, b1, b0)
         elif isinstance(i, long):
@@ -370,7 +371,7 @@ class SmileGenerator(object):
             b2 = int(((i >> 13) & 0x7F))
             b3 = int(((i >> 20) & 0x7F))
             #  fifth one is split between ints:
-            l = bsr(l, 27)
+            l = util.bsr(l, 27)
             b4 = int(((int(l)) & 0x7F))
             #  which may be enough?
             i = int((l >> 7))
@@ -554,7 +555,7 @@ class SmileGenerator(object):
             self.write_bytes(int(((i >> 7) & 0x7F)), int((i & 0x7F)))
             offset += 7
             l -= 7
-        #  and then partial piece, if any
+        # and then partial piece, if any
         if l > 0:
             i = data[offset]
             offset += 1
@@ -650,7 +651,7 @@ class SmileGenerator(object):
             if _is_valid_back_ref(len(self.shared_keys)):
                 ix = util.hash_string(name) & (len(self.shared_keys) - 1)
                 self.shared_keys[ix] = SharedStringNode(name, ref, self.shared_keys[ix])
-            # self.seen_name_count = ref + 1
+                # self.seen_name_count = ref + 1
 
     def _find_seen_string_value(self, text):
         hash_ = util.hash_string(text)
@@ -695,7 +696,7 @@ class SmileGenerator(object):
             if _is_valid_back_ref(len(self.shared_values)):
                 ix = util.hash_string(text) & (len(self.shared_values) - 1)
                 self.shared_values[ix] = SharedStringNode(text, ref, self.shared_values[ix])
-            # self.seen_string_count = ref + 1
+                # self.seen_string_count = ref + 1
 
 
 def _is_valid_back_ref(index):
@@ -795,6 +796,7 @@ def encode(py_obj, header=True, ender=False, shared_keys=True, shared_vals=True,
             # if type is unknown, raise an exception
             # TODO: verify that this is correct. make sure we aren't supposed to ignore unknown types.
             raise TypeError('Unknown type for "obj" parameter: type=%s' % type(obj).__name__)
+
     _iterencode(py_obj)
     if ender:
         sg.write_end_marker()
