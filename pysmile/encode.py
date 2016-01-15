@@ -551,7 +551,6 @@ class SmileGenerator(object):
             for x in xrange(1, 7):
                 self.write_byte(int(((i >> x) & 0x7F)))
                 i = (i << 8) | (data[offset + x] & 0xFF)
-                offset += 1
             self.write_bytes(int(((i >> 7) & 0x7F)), int((i & 0x7F)))
             offset += 7
             l -= 7
